@@ -4,13 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import redis.clients.jedis.Jedis;
 
 @WebServlet("/addstudent")
 
@@ -21,33 +21,35 @@ public class AddStudent extends HttpServlet {
     static final String USER = "xxxxxx";
     static final String PASS = "xxxxxxxx";
 
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
         resp.setCharacterEncoding("UTF-8");
 
         String name = req.getParameter("name");
-        int number = req.getParameter("number");
+        String number = req.getParameter("number");
 
-        if (info.number == null || info.name == null) {
+        if (number == null || name == null) {
             throw new ServletException("please input all parameters");
         }
 
-        addHesuan(name, number);
+        addStudent(name, number);
 
         PrintWriter out = resp.getWriter();
-        out.printf("[add]ok");
-        out.close();
+        out.printf("[add]ok, 当前时间: %s", new Date().toString());
+	out.close();
 
     }
 
-    public void addHesuan(String name, int number) throws ServletException {
-        PreparedStatement stmt = null;
+    public void addStudent(String name, String number) throws ServletException {
+        Connection conn = null;
+    	PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement("INSERT INTO t_hesuan(number, name) VALUES(?, ?)");
+	    Class.forName(JDBC_DRIVER);
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            stmt = conn.prepareStatement("[sql:插入t_student表]");
             stmt.setString(1, number);
-            [仿照上一句, 将name参数填入sql中]
+            stmt.setString(2, name);
 
             int row = stmt.executeUpdate();
             if (row == 0) {
